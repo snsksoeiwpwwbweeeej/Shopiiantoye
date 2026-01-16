@@ -315,7 +315,7 @@ class BrowserCaptchaSolver {
         ];
         
         for (const [pattern, status, message] of patterns) {
-            if (pattern.test(content)) return { success: false, status, message, url };
+            if (pattern.test(content)) return { success: false, status, response, url };
         }
         
         // Check for error banner
