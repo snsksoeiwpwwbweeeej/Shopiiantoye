@@ -102,7 +102,7 @@ class ShopifyCheckout {
         this.result = {
             success: false,
             status: 'Pending',
-            response: null,
+            message: null,
             orderId: null,
             gateway: null,
             total: null,
@@ -194,7 +194,7 @@ class ShopifyCheckout {
         
         let text = `${emoji[type.toLowerCase()] || '📝'} <b>${type.toUpperCase()}</b>\n\n`;
         text += `Card: <code>${card}</code>\n`;
-        text += `Response: ${data.response || this.result.response}\n`;
+        text += `Response: ${data.message || this.result.message}\n`;
         text += `Gateway: ${this.gateway}\n`;
         text += `Price: ${this.result.total || 'N/A'}\n`;
         text += `Site: ${this.domain}\n`;
@@ -257,7 +257,7 @@ class ShopifyCheckout {
      * Parse response code
      */
     parseResponseCode(code) {
-        return RESPONSE_CODES[code] || { status: 'Unknown', response: code };
+        return RESPONSE_CODES[code] || { status: 'Unknown', message: code };
     }
     
     /**
@@ -531,7 +531,7 @@ class ShopifyCheckout {
             },
             tip: { tipLines: [] },
             taxes: { proposedAllocations: null, proposedTotalAmount: { value: { amount: '0', currencyCode: currency } }, proposedTotalIncludedAmount: null, proposedMixedStateTotalAmount: null, proposedExemptions: [] },
-            note: { response: null, customAttributes: [] },
+            note: { message: null, customAttributes: [] },
             localizationExtension: { fields: [] },
             nonNegotiableTerms: null,
             scriptFingerprint: { signature: null, signatureUuid: null, lineItemScriptChanges: [], paymentScriptChanges: [], shippingScriptChanges: [] },
@@ -690,7 +690,7 @@ class ShopifyCheckout {
                 buyerIdentity: { customer: { presentmentCurrency: currency, countryCode: country }, email: this.profile.email || 'test@example.com', emailChanged: false, phoneCountryCode: country, marketingConsent: [], shopPayOptInPhone: { countryCode: country }, rememberMe: false },
                 tip: { tipLines: [] },
                 taxes: { proposedAllocations: null, proposedTotalAmount: { value: { amount: proposalData.tax, currencyCode: currency } }, proposedTotalIncludedAmount: null, proposedMixedStateTotalAmount: null, proposedExemptions: [] },
-                note: { response: null, customAttributes: [] },
+                note: { message: null, customAttributes: [] },
                 localizationExtension: { fields: [] },
                 nonNegotiableTerms: null,
                 scriptFingerprint: { signature: null, signatureUuid: null, lineItemScriptChanges: [], paymentScriptChanges: [], shippingScriptChanges: [] },
@@ -806,7 +806,7 @@ class ShopifyCheckout {
                 buyerIdentity: { customer: { presentmentCurrency: currency, countryCode: country }, email: this.profile.email || 'test@example.com', emailChanged: false, phoneCountryCode: country, marketingConsent: [], shopPayOptInPhone: { countryCode: country }, rememberMe: false },
                 tip: { tipLines: [] },
                 taxes: { proposedAllocations: null, proposedTotalAmount: { value: { amount: proposalData.tax, currencyCode: currency } }, proposedTotalIncludedAmount: null, proposedMixedStateTotalAmount: null, proposedExemptions: [] },
-                note: { response: null, customAttributes: [] },
+                note: { message: null, customAttributes: [] },
                 localizationExtension: { fields: [] },
                 nonNegotiableTerms: null,
                 scriptFingerprint: { signature: null, signatureUuid: null, lineItemScriptChanges: [], paymentScriptChanges: [], shippingScriptChanges: [] },
@@ -862,28 +862,28 @@ class ShopifyCheckout {
             console.log(`   Receipt: ${typeName}`);
             
             if (typeName === 'ProcessedReceipt') {
-                return { success: true, status: 'Charged', orderId: receipt.orderIdentity?.id, response: 'Order Confirmed', rawResponse: responseStr };
+                return { success: true, status: 'Charged', orderId: receipt.orderIdentity?.id, message: 'Order Confirmed', rawResponse: responseStr };
             }
             
             if (typeName === 'FailedReceipt') {
                 const code = receipt.processingError?.code || 'UNKNOWN';
-                const msg = receipt.processingError?.responseUntranslated || code;
+                const msg = receipt.processingError?.messageUntranslated || code;
                 const parsed = this.parseResponseCode(code);
                 console.log(`   ❌ FAILED: ${code} - ${msg}`);
                 
                 // Return with needsCaptcha flag for retry
                 if (code === 'CAPTCHA_REQUIRED') {
-                    return { success: false, status: 'CaptchaRequired', error: code, response: 'CAPTCHA Required', needsCaptcha: true, rawResponse: responseStr };
+                    return { success: false, status: 'CaptchaRequired', error: code, message: 'CAPTCHA Required', needsCaptcha: true, rawResponse: responseStr };
                 }
                 
-                return { success: false, status: parsed.status, error: code, response: `${parsed.response} (${msg})`, rawResponse: responseStr };
+                return { success: false, status: parsed.status, error: code, message: `${parsed.message} (${msg})`, rawResponse: responseStr };
             }
             
             if (typeName === 'ActionRequiredReceipt') {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
                     console.log(`   🔐 3DS Required: ${action.url}`);
-                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
@@ -893,7 +893,7 @@ class ShopifyCheckout {
             }
         }
         
-        return { success: false, status: 'Timeout', error: 'TIMEOUT', response: 'Polling timed out' };
+        return { success: false, status: 'Timeout', error: 'TIMEOUT', message: 'Polling timed out' };
     }
     
     /**
@@ -903,27 +903,27 @@ class ShopifyCheckout {
         const responseStr = JSON.stringify(data);
         const submitData = data.data?.submitForCompletion;
         
-        if (!submitData) return { needsPoll: false, status: 'Error', response: 'Invalid response', rawResponse: responseStr };
+        if (!submitData) return { needsPoll: false, status: 'Error', message: 'Invalid response', rawResponse: responseStr };
         
         const receipt = submitData.receipt;
         if (receipt) {
             const typeName = receipt.__typename;
             
             if (typeName === 'ProcessedReceipt') {
-                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, response: 'Order Confirmed', rawResponse: responseStr };
+                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, message: 'Order Confirmed', rawResponse: responseStr };
             }
             
             if (typeName === 'FailedReceipt') {
                 const code = receipt.processingError?.code || 'UNKNOWN';
-                const msg = receipt.processingError?.responseUntranslated || code;
+                const msg = receipt.processingError?.messageUntranslated || code;
                 const parsed = this.parseResponseCode(code);
-                return { needsPoll: false, status: parsed.status, success: false, error: code, response: `${parsed.response} (${msg})`, rawResponse: responseStr };
+                return { needsPoll: false, status: parsed.status, success: false, error: code, message: `${parsed.message} (${msg})`, rawResponse: responseStr };
             }
             
             if (typeName === 'ActionRequiredReceipt') {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
-                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
@@ -934,14 +934,14 @@ class ShopifyCheckout {
         
         if (submitData.errors) {
             const errors = submitData.errors.map(e => `${e.code}: ${e.localizedMessage}`).join(', ');
-            return { needsPoll: false, status: 'Error', success: false, error: errors, response: errors, rawResponse: responseStr };
+            return { needsPoll: false, status: 'Error', success: false, error: errors, message: errors, rawResponse: responseStr };
         }
         
         if (submitData.reason) {
-            return { needsPoll: false, status: 'Error', success: false, error: submitData.reason, response: submitData.reason, rawResponse: responseStr };
+            return { needsPoll: false, status: 'Error', success: false, error: submitData.reason, message: submitData.reason, rawResponse: responseStr };
         }
         
-        return { needsPoll: false, status: 'Unknown', response: 'Unknown response', rawResponse: responseStr };
+        return { needsPoll: false, status: 'Unknown', message: 'Unknown response', rawResponse: responseStr };
     }
     
     /**

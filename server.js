@@ -111,7 +111,7 @@ app.get('/autog', async (req, res) => {
             Status: result.success ? 'Success' : (result.status === 'Declined' ? 'Success' : 'Error'),
             Gateway: result.gateway || 'NONE',
             Price: result.total || null,
-            response: result.response || result.status,
+            response: result.message || result.status,
             Retries: 0
         });
         
@@ -120,7 +120,7 @@ app.get('/autog', async (req, res) => {
             Status: 'Error',
             Gateway: 'NONE',
             Price: null,
-            response: error.response,
+            response: error.message,
             Retries: 0
         });
     }
@@ -191,7 +191,7 @@ app.get('/checkout', async (req, res) => {
             Status: result.success ? 'Success' : (result.status === 'Declined' ? 'Success' : 'Error'),
             Gateway: result.gateway || 'NONE',
             Price: result.total || null,
-            response: result.response || result.status,
+            response: result.message || result.status,
             Retries: 0
         });
         
@@ -200,7 +200,7 @@ app.get('/checkout', async (req, res) => {
             Status: 'Error',
             Gateway: 'NONE',
             Price: null,
-            response: error.response,
+            response: error.message,
             Retries: 0
         });
     }
@@ -261,7 +261,7 @@ app.post('/checkout', async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -318,7 +318,7 @@ app.post('/test-card', async (req, res) => {
     } catch (error) {
         res.status(500).json({
             live: false,
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -351,7 +351,7 @@ app.post('/tokenize', async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -376,7 +376,7 @@ app.post('/solve-captcha', async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -399,7 +399,7 @@ app.post('/captcha-config', async (req, res) => {
         
     } catch (error) {
         res.status(500).json({
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -489,7 +489,7 @@ app.post('/bulk-checkout', async (req, res) => {
                 results.push({
                     card: card.number?.slice(-4) || 'unknown',
                     success: false,
-                    error: error.response
+                    error: error.message
                 });
             }
         }
@@ -504,7 +504,7 @@ app.post('/bulk-checkout', async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.response
+            error: error.message
         });
     }
 });
@@ -560,7 +560,7 @@ app.post('/parse-card', (req, res) => {
         });
         
     } catch (error) {
-        res.status(400).json({ error: error.response });
+        res.status(400).json({ error: error.message });
     }
 });
 
@@ -569,7 +569,7 @@ app.use((err, req, res, next) => {
     console.error('Server error:', err);
     res.status(500).json({
         error: 'Internal server error',
-        response: err.response
+        response: err.message
     });
 });
 
