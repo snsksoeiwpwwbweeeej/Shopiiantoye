@@ -40,7 +40,7 @@ const RESPONSE_CODES = {
     // Live/Approved responses
     'incorrect_zip': { status: 'Live', response: 'CCN Live (AVS Mismatch)' },
     'incorrect_cvc': { status: 'Live', response: 'CCN Live (CVV Mismatch)' },
-    'CVV_MISMATCH': { status: 'Live', response: 'CCN Live (CVV Mismatch)' },
+    'CVV_MISMATCH': { status: 'Live', message: 'CCN Live (CVV Mismatch)' },
     'AVS_MISMATCH': { status: 'Live', response: 'CCN Live (AVS Mismatch)' },
     
     // 3DS/Authentication
