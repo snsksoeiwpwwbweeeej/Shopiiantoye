@@ -40,7 +40,7 @@ const RESPONSE_CODES = {
     // Live/Approved responses
     'incorrect_zip': { status: 'Live', response: 'CCN Live (AVS Mismatch)' },
     'incorrect_cvc': { status: 'Live', response: 'CCN Live (CVV Mismatch)' },
-    'CVV_MISMATCH': { status: 'Live', message: 'CCN Live (CVV Mismatch)' },
+    'CVV_MISMATCH': { status: 'Live', response: 'CCN Live (CVV Mismatch)' },
     'AVS_MISMATCH': { status: 'Live', response: 'CCN Live (AVS Mismatch)' },
     
     // 3DS/Authentication
@@ -883,7 +883,7 @@ class ShopifyCheckout {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
                     console.log(`   🔐 3DS Required: ${action.url}`);
-                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
@@ -910,7 +910,7 @@ class ShopifyCheckout {
             const typeName = receipt.__typename;
             
             if (typeName === 'ProcessedReceipt') {
-                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, message: 'Order Confirmed', rawResponse: responseStr };
+                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, response: 'Order Confirmed', rawResponse: responseStr };
             }
             
             if (typeName === 'FailedReceipt') {
@@ -923,7 +923,7 @@ class ShopifyCheckout {
             if (typeName === 'ActionRequiredReceipt') {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
-                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
