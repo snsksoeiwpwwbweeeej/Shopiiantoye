@@ -314,8 +314,8 @@ class BrowserCaptchaSolver {
             [/captcha/i, 'Error', 'CAPTCHA Failed']
         ];
         
-        for (const [pattern, status, message] of patterns) {
-            if (pattern.test(content)) return { success: false, status, message, url };
+        for (const [pattern, status, response] of patterns) {
+            if (pattern.test(content)) return { success: false, status, response, url };
         }
         
         // Check for error banner
