@@ -314,20 +314,20 @@ class BrowserCaptchaSolver {
             [/captcha/i, 'Error', 'CAPTCHA Failed']
         ];
         
-        for (const [pattern, status, message] of patterns) {
+        for (const [pattern, status, response] of patterns) {
             if (pattern.test(content)) return { success: false, status, response, url };
         }
         
         // Check for error banner
         try {
-            const err = await this.page.$('.notice--error, .field__message--error');
+            const err = await this.page.$('.notice--error, .field__response--error');
             if (err) {
                 const text = await err.evaluate(e => e.textContent.trim());
-                return { success: false, status: 'Error', message: text.substring(0, 80), url };
+                return { success: false, status: 'Error', response: text.substring(0, 80), url };
             }
         } catch {}
         
-        return { success: false, status: 'Unknown', message: 'Result unclear', url };
+        return { success: false, status: 'Unknown', response: 'Result unclear', url };
     }
 
     async run() {
@@ -355,7 +355,7 @@ class BrowserCaptchaSolver {
             return result;
             
         } catch (error) {
-            return { success: false, status: 'Error', message: error.message, time: `${((Date.now() - startTime) / 1000).toFixed(2)}s` };
+            return { success: false, status: 'Error', response: error.message, time: `${((Date.now() - startTime) / 1000).toFixed(2)}s` };
         } finally {
             if (this.browser) await this.browser.close();
         }
