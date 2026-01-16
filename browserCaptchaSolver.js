@@ -298,11 +298,11 @@ class BrowserCaptchaSolver {
         const content = await this.page.content();
         
         if (url.includes('thank_you') || url.includes('thank-you') || url.includes('orders/')) {
-            return { success: true, status: 'Charged', response: 'Order Confirmed', url };
+            return { success: true, status: 'Charged', message: 'Order Confirmed', url };
         }
         
         if (content.includes('3D Secure') || content.includes('authentication') || url.includes('authenticate')) {
-            return { success: false, status: '3DS', response: '3D Secure Required', url };
+            return { success: false, status: '3DS', message: '3D Secure Required', url };
         }
         
         const patterns = [
@@ -314,20 +314,20 @@ class BrowserCaptchaSolver {
             [/captcha/i, 'Error', 'CAPTCHA Failed']
         ];
         
-        for (const [pattern, status, response] of patterns) {
-            if (pattern.test(content)) return { success: false, status, response, url };
+        for (const [pattern, status, message] of patterns) {
+            if (pattern.test(content)) return { success: false, status, message, url };
         }
         
         // Check for error banner
         try {
-            const err = await this.page.$('.notice--error, .field__response--error');
+            const err = await this.page.$('.notice--error, .field__message--error');
             if (err) {
                 const text = await err.evaluate(e => e.textContent.trim());
                 return { success: false, status: 'Error', response: text.substring(0, 80), url };
             }
         } catch {}
         
-        return { success: false, status: 'Unknown', response: 'Result unclear', url };
+        return { success: false, status: 'Unknown', message: 'Result unclear', url };
     }
 
     async run() {
