@@ -315,7 +315,7 @@ class BrowserCaptchaSolver {
         ];
         
         for (const [pattern, status, message] of patterns) {
-            if (pattern.test(content)) return { success: false, status, message, url };
+            if (pattern.test(content)) return { success: false, status, response, url };
         }
         
         // Check for error banner
@@ -323,7 +323,7 @@ class BrowserCaptchaSolver {
             const err = await this.page.$('.notice--error, .field__message--error');
             if (err) {
                 const text = await err.evaluate(e => e.textContent.trim());
-                return { success: false, status: 'Error', message: text.substring(0, 80), url };
+                return { success: false, status: 'Error', response: text.substring(0, 80), url };
             }
         } catch {}
         
@@ -355,7 +355,7 @@ class BrowserCaptchaSolver {
             return result;
             
         } catch (error) {
-            return { success: false, status: 'Error', message: error.message, time: `${((Date.now() - startTime) / 1000).toFixed(2)}s` };
+            return { success: false, status: 'Error', response: error.message, time: `${((Date.now() - startTime) / 1000).toFixed(2)}s` };
         } finally {
             if (this.browser) await this.browser.close();
         }
