@@ -298,11 +298,11 @@ class BrowserCaptchaSolver {
         const content = await this.page.content();
         
         if (url.includes('thank_you') || url.includes('thank-you') || url.includes('orders/')) {
-            return { success: true, status: 'Charged', message: 'Order Confirmed', url };
+            return { success: true, status: 'Charged', response: 'Order Confirmed', url };
         }
         
         if (content.includes('3D Secure') || content.includes('authentication') || url.includes('authenticate')) {
-            return { success: false, status: '3DS', message: '3D Secure Required', url };
+            return { success: false, status: '3DS', response: '3D Secure Required', url };
         }
         
         const patterns = [
@@ -315,7 +315,7 @@ class BrowserCaptchaSolver {
         ];
         
         for (const [pattern, status, message] of patterns) {
-            if (pattern.test(content)) return { success: false, status, message, url };
+            if (pattern.test(content)) return { success: false, status, response, url };
         }
         
         // Check for error banner
