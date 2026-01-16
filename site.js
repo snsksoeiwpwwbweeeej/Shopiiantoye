@@ -862,7 +862,7 @@ class ShopifyCheckout {
             console.log(`   Receipt: ${typeName}`);
             
             if (typeName === 'ProcessedReceipt') {
-                return { success: true, status: 'Charged', orderId: receipt.orderIdentity?.id, response: 'Order Confirmed', rawResponse: responseStr };
+                return { success: true, status: 'Charged', orderId: receipt.orderIdentity?.id, message: 'Order Confirmed', rawResponse: responseStr };
             }
             
             if (typeName === 'FailedReceipt') {
@@ -873,7 +873,7 @@ class ShopifyCheckout {
                 
                 // Return with needsCaptcha flag for retry
                 if (code === 'CAPTCHA_REQUIRED') {
-                    return { success: false, status: 'CaptchaRequired', error: code, response: 'CAPTCHA Required', needsCaptcha: true, rawResponse: responseStr };
+                    return { success: false, status: 'CaptchaRequired', error: code, message: 'CAPTCHA Required', needsCaptcha: true, rawResponse: responseStr };
                 }
                 
                 return { success: false, status: parsed.status, error: code, message: `${parsed.message} (${msg})`, rawResponse: responseStr };
@@ -883,7 +883,7 @@ class ShopifyCheckout {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
                     console.log(`   🔐 3DS Required: ${action.url}`);
-                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { success: false, status: '3DS', error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
@@ -893,7 +893,7 @@ class ShopifyCheckout {
             }
         }
         
-        return { success: false, status: 'Timeout', error: 'TIMEOUT', response: 'Polling timed out' };
+        return { success: false, status: 'Timeout', error: 'TIMEOUT', message: 'Polling timed out' };
     }
     
     /**
@@ -903,14 +903,14 @@ class ShopifyCheckout {
         const responseStr = JSON.stringify(data);
         const submitData = data.data?.submitForCompletion;
         
-        if (!submitData) return { needsPoll: false, status: 'Error', response: 'Invalid response', rawResponse: responseStr };
+        if (!submitData) return { needsPoll: false, status: 'Error', message: 'Invalid response', rawResponse: responseStr };
         
         const receipt = submitData.receipt;
         if (receipt) {
             const typeName = receipt.__typename;
             
             if (typeName === 'ProcessedReceipt') {
-                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, response: 'Order Confirmed', rawResponse: responseStr };
+                return { needsPoll: false, status: 'Charged', success: true, orderId: receipt.orderIdentity?.id, message: 'Order Confirmed', rawResponse: responseStr };
             }
             
             if (typeName === 'FailedReceipt') {
@@ -923,7 +923,7 @@ class ShopifyCheckout {
             if (typeName === 'ActionRequiredReceipt') {
                 const action = receipt.action;
                 if (action?.__typename === 'CompletePaymentChallenge') {
-                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', response: '3D Secure Required', url: action.url, rawResponse: responseStr };
+                    return { needsPoll: false, status: '3DS', success: false, error: 'CompletePaymentChallenge', message: '3D Secure Required', url: action.url, rawResponse: responseStr };
                 }
             }
             
@@ -941,7 +941,7 @@ class ShopifyCheckout {
             return { needsPoll: false, status: 'Error', success: false, error: submitData.reason, message: submitData.reason, rawResponse: responseStr };
         }
         
-        return { needsPoll: false, status: 'Unknown', response: 'Unknown response', rawResponse: responseStr };
+        return { needsPoll: false, status: 'Unknown', message: 'Unknown response', rawResponse: responseStr };
     }
     
     /**
