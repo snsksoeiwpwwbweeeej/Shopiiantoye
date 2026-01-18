@@ -111,7 +111,7 @@ app.get('/autog', async (req, res) => {
             Status: result.success ? 'Success' : (result.status === 'Declined' ? 'Success' : 'Error'),
             Gateway: result.gateway || 'NONE',
             Price: result.total || null,
-            response: result.message || result.status,
+            response: result.response || result.status,
             Retries: 0
         });
         
@@ -191,7 +191,7 @@ app.get('/checkout', async (req, res) => {
             Status: result.success ? 'Success' : (result.status === 'Declined' ? 'Success' : 'Error'),
             Gateway: result.gateway || 'NONE',
             Price: result.total || null,
-            response: result.message || result.status,
+            response: result.response || result.status,
             Retries: 0
         });
         
@@ -569,7 +569,7 @@ app.use((err, req, res, next) => {
     console.error('Server error:', err);
     res.status(500).json({
         error: 'Internal server error',
-        message: err.message
+        response: err.message
     });
 });
 
